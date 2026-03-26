@@ -1,10 +1,16 @@
 storage/database.sqlite
 storage/*.sqlite
+!storage/.gitkeep
 
 tmp_*.php
 out_*.html
 
 Thumbs.db
+.DS_Store
 *.log
 
 .vscode/
+public/uploads/*
+!public/uploads/.gitkeep
+storage/template-backups/*
+!storage/template-backups/.gitkeep
