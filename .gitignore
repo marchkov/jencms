@@ -1,0 +1,10 @@
+storage/database.sqlite
+storage/*.sqlite
+
+tmp_*.php
+out_*.html
+
+Thumbs.db
+*.log
+
+.vscode/
