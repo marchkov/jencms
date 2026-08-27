@@ -5,8 +5,6 @@ CREATE TABLE users (
     login TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     name TEXT DEFAULT NULL,
-    email TEXT DEFAULT NULL UNIQUE,
-    role TEXT NOT NULL DEFAULT 'administrator',
     is_active INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
@@ -70,8 +68,6 @@ CREATE TABLE posts (
     UNIQUE (section_id, slug)
 );
 
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_pages_slug ON pages(slug);
 CREATE INDEX idx_sections_slug ON sections(slug);
 CREATE INDEX idx_categories_section_id ON categories(section_id);

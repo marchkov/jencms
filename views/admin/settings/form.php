@@ -51,9 +51,23 @@
     </section>
 
     <section class="card">
-      <h2>System note</h2>
-      <p>This screen edits runtime content settings kept in SQLite.</p>
-      <p>Environment-specific values such as <code>site.url</code>, database path, debug mode, and theme filesystem settings still stay in <code>settings.php</code>.</p>
+      <h2>System Check</h2>
+      <p class="muted">Read-only diagnostics. JenCMS does not change permissions or configuration.</p>
+
+      <div class="system-checks">
+        <?php foreach ($systemChecks as $check): ?>
+          <div class="system-check">
+            <div class="system-check__heading">
+              <strong><?= e($check['name']) ?></strong>
+              <span class="system-status system-status--<?= e($check['status']) ?>"><?= e(strtoupper($check['status'])) ?></span>
+            </div>
+            <div><?= e($check['result']) ?></div>
+            <?php if ($check['recommendation'] !== ''): ?>
+              <div class="muted"><?= e($check['recommendation']) ?></div>
+            <?php endif; ?>
+          </div>
+        <?php endforeach; ?>
+      </div>
     </section>
   </div>
 

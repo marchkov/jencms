@@ -9,26 +9,14 @@ use RuntimeException;
 
 final class Initializer
 {
-    public static function bootstrap(PDO $pdo, string $schemaPath): void
+    public static function bootstrap(PDO $pdo, string $migrationsPath): void
     {
-        if (! self::hasTable($pdo, 'pages')) {
-            $schema = file_get_contents($schemaPath);
-
-            if ($schema === false) {
-                throw new RuntimeException('Unable to read database schema.');
-            }
-
-            $pdo->exec($schema);
-        }
-
-        self::ensureSettingsTable($pdo);
+        Migrator::migrate($pdo, $migrationsPath);
 
         if (! self::hasSeedData($pdo)) {
-            self::seed($pdo, dirname($schemaPath) . '/../source_main_content.html');
+            self::seed($pdo, dirname($migrationsPath) . '/source_main_content.html');
         }
 
-        self::ensureUsersEmailColumn($pdo);
-        self::ensureUsersRoleColumn($pdo);
         self::ensureDefaultAdminUser($pdo);
     }
 
@@ -40,20 +28,6 @@ final class Initializer
         return (bool) $statement->fetchColumn();
     }
 
-    private static function hasColumn(PDO $pdo, string $table, string $column): bool
-    {
-        $statement = $pdo->query('PRAGMA table_info(' . $table . ')');
-        $columns = $statement ? $statement->fetchAll(PDO::FETCH_ASSOC) : [];
-
-        foreach ($columns as $info) {
-            if (($info['name'] ?? '') === $column) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private static function hasSeedData(PDO $pdo): bool
     {
         if (! self::hasTable($pdo, 'pages')) {
@@ -63,43 +37,6 @@ final class Initializer
         $statement = $pdo->query('SELECT COUNT(*) FROM pages');
 
         return (int) $statement->fetchColumn() > 0;
-    }
-
-    private static function ensureSettingsTable(PDO $pdo): void
-    {
-        $pdo->exec(
-            'CREATE TABLE IF NOT EXISTS settings (
-                key_name TEXT PRIMARY KEY,
-                value TEXT NOT NULL,
-                updated_at TEXT NOT NULL
-            )'
-        );
-    }
-
-    private static function ensureUsersEmailColumn(PDO $pdo): void
-    {
-        if (! self::hasTable($pdo, 'users')) {
-            return;
-        }
-
-        if (! self::hasColumn($pdo, 'users', 'email')) {
-            $pdo->exec('ALTER TABLE users ADD COLUMN email TEXT DEFAULT NULL');
-        }
-
-        $pdo->exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)');
-    }
-
-    private static function ensureUsersRoleColumn(PDO $pdo): void
-    {
-        if (! self::hasTable($pdo, 'users')) {
-            return;
-        }
-
-        if (! self::hasColumn($pdo, 'users', 'role')) {
-            $pdo->exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'administrator'");
-        }
-
-        $pdo->exec("UPDATE users SET role = 'administrator' WHERE role IS NULL OR role = ''");
     }
 
     private static function ensureDefaultAdminUser(PDO $pdo): void

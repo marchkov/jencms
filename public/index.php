@@ -27,6 +27,7 @@ use App\Repositories\TemplateFileRepository;
 use App\Repositories\UserRepository;
 use App\Router\Router;
 use App\Template\Template;
+use App\Support\SystemCheck;
 
 define('BASE_PATH', dirname(__DIR__));
 
@@ -35,8 +36,6 @@ $config = require BASE_PATH . '/settings.php';
 require BASE_PATH . '/src/Support/helpers.php';
 require BASE_PATH . '/src/Support/autoload.php';
 
-ensure_session_started();
-
 if ($config['debug']['enabled']) {
     ini_set('display_errors', '1');
     error_reporting(E_ALL);
@@ -44,12 +43,13 @@ if ($config['debug']['enabled']) {
 
 try {
     $pdo = Connection::create($config['database']);
-    Initializer::bootstrap($pdo, BASE_PATH . '/storage/migrations/001_init.sql');
+    Initializer::bootstrap($pdo, BASE_PATH . '/storage/migrations');
 
     $settingsRepository = new SettingsRepository($pdo);
     $config = array_replace_recursive($config, $settingsRepository->loadOverrides());
 
     if (is_admin_request($config, $_SERVER['REQUEST_URI'] ?? '/')) {
+        ensure_session_started($config);
         dispatch_admin_request($config, $pdo, $settingsRepository);
         return;
     }
@@ -130,7 +130,12 @@ function dispatch_admin_request(array $config, PDO $pdo, SettingsRepository $set
         $config
     );
     $userController = new AdminUserController($userRepository, $config);
-    $settingsController = new AdminSettingsController($settingsRepository, $pageRepository, $config);
+    $settingsController = new AdminSettingsController(
+        $settingsRepository,
+        $pageRepository,
+        new SystemCheck($pdo, $config, BASE_PATH),
+        $config
+    );
     $templateController = new AdminTemplateController(
         new TemplateFileRepository(
             BASE_PATH . '/public/themes/' . $config['site']['theme'],

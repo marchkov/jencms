@@ -12,10 +12,15 @@ It is intended to be a clean base for future site builds: simple to launch local
 - media uploads
 - template editing from the admin panel
 - SQLite-based setup with automatic bootstrap on first run
+- sequential database migrations
+- environment and permission checks in the admin settings
 
 ## Requirements
 
 - PHP 8.1 or newer
+- PDO SQLite extension
+- Fileinfo extension for secure media uploads
+- Mbstring extension is recommended for Unicode text handling
 
 ## Quick Start
 
@@ -32,8 +37,9 @@ Open in browser:
 - Site: `http://localhost:8000/`
 - Admin: `http://localhost:8000/admin`
 
-On first launch, JenCMS creates the SQLite database automatically using
-[`storage/migrations/001_init.sql`](storage/migrations/001_init.sql).
+On first launch, JenCMS creates the SQLite database automatically using the
+sequential SQL files in [`storage/migrations/`](storage/migrations/). Existing
+databases are detected and upgraded without recreating their content.
 
 ## Default Admin Login
 
@@ -41,6 +47,9 @@ On first launch, JenCMS creates the SQLite database automatically using
 - Password: `admin123`
 
 Change the password after the first login.
+
+The admin panel warns while this default password remains active under
+`Settings → System Check`.
 
 ## Project Structure
 
@@ -59,6 +68,7 @@ JenCMS currently provides:
 - one-language content management
 - SQLite storage
 - admin panel for pages, sections, categories, posts, media, users, settings, and theme files
+- read-only system checks for PHP, SQLite, filesystem access, upload limits, and basic deployment security
 
 ## Git Notes
 
@@ -77,13 +87,22 @@ it contains application source, configuration, and storage files.
 For Apache, the included `public/.htaccess` provides the rewrite rule when
 `mod_rewrite` and per-directory overrides are enabled.
 
-## Routing smoke test
+Only `storage/`, `public/uploads/`, and editable theme files need write access
+from the web-server account. `Settings → System Check` tests the effective
+access and provides platform-appropriate recommendations; it never changes
+permissions automatically.
 
-With PHP available on `PATH`, run:
+Administrator sessions use `HttpOnly` and `SameSite=Lax` cookies, regenerate
+their ID after authentication, and expire after 30 minutes without admin
+activity. Change `security.admin_session_idle_timeout` in `settings.php` when a
+different timeout is required.
+
+## Smoke tests
+
+With PHP and PowerShell available on `PATH`, run the complete suite:
 
 ```powershell
-.\tests\routing-smoke.ps1
-php .\tests\content-storage-smoke.php
+.\tests\run-smoke.ps1
 ```
 
 ## Rebuilding the admin editor
@@ -100,12 +119,23 @@ npm run build:editor
 Commit `package-lock.json` together with dependency upgrades and keep all Tiptap
 packages pinned to the same version.
 
+## Template variables
+
+The active theme can use the following variables in `.tpl` files:
+
+- content: `[HEADER]`, `[CONTENT]`, `[FOOTER]`
+- metadata: `[PAGE_TITLE]`, `[META_KEYWORDS]`, `[META_DESCRIPTION]`
+- site URLs: `[SITE_NAME]`, `[SITE_URL]`, `[HOME_URL]`, `[CURRENT_URL]`, `[ADMIN_URL]`
+- theme and page values: `[THEME_URL]`, `[BODY_CLASS]`, `[HTML_LANG]`, `[CURRENT_YEAR]`
+
+The same reference is available in the admin panel under Templates. Content,
+header, and footer contain rendered HTML; other values are HTML-escaped.
+
 ## Roadmap
 
 - cleaner starter content and a more neutral default homepage
 - theme documentation for designers and frontend handoff
-- optional installation script or setup checks
-- role and permission improvements
+- role and permission improvements when a real project requires them
 
 ## Goal
 

@@ -19,7 +19,7 @@ final class Connection
         $directory = dirname($path);
 
         if (! is_dir($directory)) {
-            mkdir($directory, 0777, true);
+            mkdir($directory, 0755, true);
         }
 
         $pdo = new PDO('sqlite:' . $path);

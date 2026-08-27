@@ -10,6 +10,10 @@ All notable changes to this project will be documented in this file.
 - moved the default theme under `public/themes/`
 - converted content forms to a full-width stacked layout
 - replaced the legacy rich-text editor with locally bundled Tiptap 3.30.2
+- changed automatic schema fixes to ordered, transaction-safe SQLite migrations
+- hardened administrator sessions and filesystem creation permissions
+- validate uploaded file content with Fileinfo and reject SVG uploads
+- removed duplicate and unused template-variable aliases
 
 ### Added
 
@@ -18,6 +22,10 @@ All notable changes to this project will be documented in this file.
 - Media Library image selection and authenticated AJAX image uploads
 - reproducible npm build files for the editor bundle
 - routing and raw HTML storage smoke tests
+- `Settings → System Check` diagnostics for the PHP environment, filesystem, SQLite, uploads, and default password
+- migration, session-security, and system-check smoke tests
+- a single smoke-suite runner
+- template-variable reference in the Templates section
 
 ### Fixed
 

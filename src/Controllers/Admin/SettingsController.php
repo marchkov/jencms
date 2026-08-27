@@ -6,12 +6,14 @@ namespace App\Controllers\Admin;
 
 use App\Repositories\AdminPageRepository;
 use App\Repositories\SettingsRepository;
+use App\Support\SystemCheck;
 
 final class SettingsController
 {
     public function __construct(
         private readonly SettingsRepository $settings,
         private readonly AdminPageRepository $pages,
+        private readonly SystemCheck $systemCheck,
         private readonly array $config
     ) {
     }
@@ -25,6 +27,7 @@ final class SettingsController
             'formAction' => admin_path($this->config, 'settings'),
             'settingsForm' => $this->buildFormData(),
             'pages' => $this->pages->options(),
+            'systemChecks' => $this->systemCheck->run(),
             'errors' => [],
         ]);
     }
@@ -41,6 +44,7 @@ final class SettingsController
                 'formAction' => admin_path($this->config, 'settings'),
                 'settingsForm' => $form,
                 'pages' => $this->pages->options(),
+                'systemChecks' => $this->systemCheck->run(),
                 'errors' => $errors,
             ]);
             return;

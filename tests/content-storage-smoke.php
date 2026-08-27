@@ -2,17 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Database\Migrator;
 use App\Repositories\AdminPageRepository;
 
 define('BASE_PATH', dirname(__DIR__));
 require BASE_PATH . '/src/Support/autoload.php';
 
 $pdo = new PDO('sqlite::memory:');
-$schema = file_get_contents(BASE_PATH . '/storage/migrations/001_init.sql');
-if ($schema === false) {
-    throw new RuntimeException('Unable to load the test schema.');
-}
-$pdo->exec($schema);
+Migrator::migrate($pdo, BASE_PATH . '/storage/migrations');
 
 $repository = new AdminPageRepository($pdo);
 $rawHtml = '<section data-component="hero"><div class="slider"><custom-card data-id="7">Text</custom-card></div></section>';

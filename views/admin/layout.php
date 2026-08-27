@@ -46,6 +46,13 @@
     .errors { margin: 0 0 16px; padding: 12px 16px; border: 1px solid #d8aaaa; background: #fff2f2; }
     .errors li + li { margin-top: 6px; }
     .muted { color: #666; }
+    .system-checks { display: grid; gap: 10px; }
+    .system-check { display: grid; gap: 5px; padding: 10px 0; border-top: 1px solid #ddd; overflow-wrap: anywhere; }
+    .system-check__heading { display: flex; gap: 8px; justify-content: space-between; align-items: center; }
+    .system-status { display: inline-block; min-width: 64px; padding: 4px 7px; border: 1px solid #bbb; text-align: center; font-size: 12px; font-weight: bold; }
+    .system-status--ok { background: #edf7ed; border-color: #8fbe93; color: #235d29; }
+    .system-status--warning { background: #fff7df; border-color: #d8bd68; color: #705800; }
+    .system-status--error { background: #fdf0f0; border-color: #d99797; color: #8c1d1d; }
     .auth-shell { max-width: 460px; margin: 48px auto; background: #fff; border: 1px solid #d8d8d8; padding: 20px; }
     .auth-shell h1 { margin-top: 0; }
     @media (max-width: 720px) {

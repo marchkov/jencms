@@ -20,6 +20,9 @@ return [
     'routes' => [
         'admin_prefix' => 'admin',
     ],
+    'security' => [
+        'admin_session_idle_timeout' => 1800,
+    ],
     'debug' => [
         'enabled' => false,
     ],

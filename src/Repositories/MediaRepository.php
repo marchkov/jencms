@@ -11,10 +11,25 @@ final class MediaRepository
 {
     private const MAX_FILE_SIZE = 10485760;
 
-    private const ALLOWED_EXTENSIONS = [
-        'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg',
-        'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
-        'zip', 'txt', 'mp4', 'webm', 'mp3', 'ogg'
+    private const ALLOWED_MIME_TYPES = [
+        'jpg' => ['image/jpeg'],
+        'jpeg' => ['image/jpeg'],
+        'png' => ['image/png'],
+        'gif' => ['image/gif'],
+        'webp' => ['image/webp'],
+        'pdf' => ['application/pdf'],
+        'doc' => ['application/msword', 'application/CDFV2'],
+        'docx' => ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/zip'],
+        'xls' => ['application/vnd.ms-excel', 'application/CDFV2'],
+        'xlsx' => ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/zip'],
+        'ppt' => ['application/vnd.ms-powerpoint', 'application/CDFV2'],
+        'pptx' => ['application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/zip'],
+        'zip' => ['application/zip', 'application/x-zip-compressed'],
+        'txt' => ['text/plain'],
+        'mp4' => ['video/mp4'],
+        'webm' => ['video/webm'],
+        'mp3' => ['audio/mpeg'],
+        'ogg' => ['audio/ogg', 'video/ogg', 'application/ogg'],
     ];
 
     public function __construct(
@@ -69,7 +84,7 @@ final class MediaRepository
 
         $originalName = (string) ($file['name'] ?? '');
         $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-        if (! in_array($extension, self::ALLOWED_EXTENSIONS, true)) {
+        if (! isset(self::ALLOWED_MIME_TYPES[$extension])) {
             throw new RuntimeException('That file type is not allowed.');
         }
 
@@ -83,9 +98,21 @@ final class MediaRepository
             throw new RuntimeException('Invalid uploaded file.');
         }
 
+        if (! class_exists(\finfo::class)) {
+            throw new RuntimeException('The PHP fileinfo extension is required for secure uploads.');
+        }
+
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($tmpName);
+        if (! is_string($mimeType) || ! in_array($mimeType, self::ALLOWED_MIME_TYPES[$extension], true)) {
+            throw new RuntimeException('The file content does not match its extension.');
+        }
+
         if (! move_uploaded_file($tmpName, $targetPath)) {
             throw new RuntimeException('Unable to move the uploaded file.');
         }
+
+        @chmod($targetPath, 0644);
 
         return $this->publicPath($targetName);
     }
@@ -103,7 +130,7 @@ final class MediaRepository
 
     private function ensureUploadDir(): void
     {
-        if (! is_dir($this->uploadDir) && ! mkdir($concurrentDirectory = $this->uploadDir, 0777, true) && ! is_dir($concurrentDirectory)) {
+        if (! is_dir($this->uploadDir) && ! mkdir($concurrentDirectory = $this->uploadDir, 0755, true) && ! is_dir($concurrentDirectory)) {
             throw new RuntimeException('Unable to create the upload directory.');
         }
     }

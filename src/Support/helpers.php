@@ -137,18 +137,63 @@ function admin_path(array $config, string $path = ''): string
     return site_page_url($config, $fullPath);
 }
 
-function ensure_session_started(): void
+function ensure_session_started(?array $config = null): void
 {
     if (session_status() !== PHP_SESSION_ACTIVE) {
+        $secure = request_is_https($config);
+        ini_set('session.use_strict_mode', '1');
+        ini_set('session.use_only_cookies', '1');
+        session_name('JENCMSSESSID');
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path' => '/',
+            'secure' => $secure,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
         session_start();
     }
+
+    if ($config !== null) {
+        $_SESSION['_admin_idle_timeout'] = max(300, (int) ($config['security']['admin_session_idle_timeout'] ?? 1800));
+    }
+}
+
+function request_is_https(?array $config = null): bool
+{
+    $https = strtolower((string) ($_SERVER['HTTPS'] ?? ''));
+    if ($https !== '' && $https !== 'off') {
+        return true;
+    }
+
+    if ((int) ($_SERVER['SERVER_PORT'] ?? 0) === 443) {
+        return true;
+    }
+
+    return $config !== null && parse_url((string) ($config['site']['url'] ?? ''), PHP_URL_SCHEME) === 'https';
 }
 
 function is_admin_authenticated(): bool
 {
     ensure_session_started();
 
-    return isset($_SESSION['admin_user']) && is_array($_SESSION['admin_user']);
+    if (! isset($_SESSION['admin_user']) || ! is_array($_SESSION['admin_user'])) {
+        return false;
+    }
+
+    $now = time();
+    $lastActivity = (int) ($_SESSION['_admin_last_activity'] ?? $now);
+    $timeout = max(300, (int) ($_SESSION['_admin_idle_timeout'] ?? 1800));
+
+    if ($now - $lastActivity > $timeout) {
+        unset($_SESSION['admin_user'], $_SESSION['_admin_last_activity']);
+
+        return false;
+    }
+
+    $_SESSION['_admin_last_activity'] = $now;
+
+    return true;
 }
 
 function require_admin_auth(array $config): void
@@ -197,6 +242,7 @@ function require_admin_role(array $config, array $roles): void
 function set_admin_user(array $user): void
 {
     ensure_session_started();
+    session_regenerate_id(true);
     $_SESSION['admin_user'] = [
         'id' => $user['id'] ?? null,
         'login' => $user['login'] ?? '',
@@ -204,12 +250,15 @@ function set_admin_user(array $user): void
         'email' => $user['email'] ?? '',
         'role' => $user['role'] ?? 'administrator',
     ];
+    $_SESSION['_admin_last_activity'] = time();
+    unset($_SESSION['_csrf_token']);
 }
 
 function clear_admin_user(): void
 {
     ensure_session_started();
-    unset($_SESSION['admin_user']);
+    unset($_SESSION['admin_user'], $_SESSION['_admin_last_activity'], $_SESSION['_csrf_token']);
+    session_regenerate_id(true);
 }
 
 function flash(string $key, ?string $message = null): ?string

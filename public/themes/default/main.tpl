@@ -17,9 +17,9 @@
       </div>
     </header>
 
-    <main class="site-main"><div class="container">
+    <main class="site-main">
       [CONTENT]
-    </div></main>
+    </main>
 
     <footer class="site-footer">
       <div class="site-container">

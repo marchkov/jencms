@@ -132,7 +132,7 @@ final class TemplateFileRepository
     private function createBackup(string $relativePath, string $contents): void
     {
         $backupDirectory = $this->backupDirectoryFor($relativePath);
-        if (! is_dir($backupDirectory) && ! @mkdir($backupDirectory, 0777, true) && ! is_dir($backupDirectory)) {
+        if (! is_dir($backupDirectory) && ! @mkdir($backupDirectory, 0755, true) && ! is_dir($backupDirectory)) {
             throw new RuntimeException('Unable to create backup directory.');
         }
 
@@ -216,7 +216,7 @@ final class TemplateFileRepository
     {
         $basePath = $this->backupRootPath . DIRECTORY_SEPARATOR . basename($this->basePath());
 
-        if (! is_dir($basePath) && ! @mkdir($basePath, 0777, true) && ! is_dir($basePath)) {
+        if (! is_dir($basePath) && ! @mkdir($basePath, 0755, true) && ! is_dir($basePath)) {
             throw new RuntimeException('Unable to initialize backup storage.');
         }
 
