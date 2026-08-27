@@ -32,7 +32,8 @@ Open in browser:
 - Site: `http://localhost:8000/`
 - Admin: `http://localhost:8000/admin`
 
-On first launch, JenCMS creates the SQLite database automatically using [storage/migrations/001_init.sql](/d:/Denis/JenCms/storage/migrations/001_init.sql).
+On first launch, JenCMS creates the SQLite database automatically using
+[`storage/migrations/001_init.sql`](storage/migrations/001_init.sql).
 
 ## Default Admin Login
 
@@ -105,14 +106,6 @@ packages pinned to the same version.
 - theme documentation for designers and frontend handoff
 - optional installation script or setup checks
 - role and permission improvements
-- cleaner public release structure and documentation
-
-## Planned Cleanup
-
-- remove older leftover artifacts if any appear during future refactors
-- simplify admin wording and polish UX
-- review naming consistency across modules and directories
-- add a small smoke-test checklist for releases
 
 ## Goal
 

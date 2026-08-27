@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+
+- made `public/` the single supported web root
+- moved the default theme under `public/themes/`
+- converted content forms to a full-width stacked layout
+- replaced the legacy rich-text editor with locally bundled Tiptap 3.30.2
+
+### Added
+
+- PHP development-server router and Apache rewrite configuration under `public/`
+- visual/source and fullscreen editor modes
+- Media Library image selection and authenticated AJAX image uploads
+- reproducible npm build files for the editor bundle
+- routing and raw HTML storage smoke tests
+
+### Fixed
+
+- static theme, upload, and admin asset routing
+- template-backup error handling
+
 ## [v0.1.0] - 2026-03-26
 
 First public foundation release of JenCMS.
