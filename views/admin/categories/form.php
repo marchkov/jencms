@@ -13,7 +13,7 @@
 <form method="post" action="<?= e($formAction) ?>">
   <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
 
-  <div class="grid grid--two">
+  <div class="form-stack">
     <section class="card">
       <h2>General settings</h2>
 

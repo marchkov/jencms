@@ -85,7 +85,7 @@ final class TemplateFileRepository
 
         $this->createBackup($relativePath, $currentContents);
 
-        $written = file_put_contents($fullPath, $content, LOCK_EX);
+        $written = @file_put_contents($fullPath, $content, LOCK_EX);
         if ($written === false) {
             throw new RuntimeException('Unable to save template file.');
         }
@@ -132,7 +132,7 @@ final class TemplateFileRepository
     private function createBackup(string $relativePath, string $contents): void
     {
         $backupDirectory = $this->backupDirectoryFor($relativePath);
-        if (! is_dir($backupDirectory) && ! mkdir($backupDirectory, 0777, true) && ! is_dir($backupDirectory)) {
+        if (! is_dir($backupDirectory) && ! @mkdir($backupDirectory, 0777, true) && ! is_dir($backupDirectory)) {
             throw new RuntimeException('Unable to create backup directory.');
         }
 
@@ -140,7 +140,7 @@ final class TemplateFileRepository
         $backupFilename = basename($relativePath) . '.' . $timestamp . '.bak';
         $backupPath = $backupDirectory . DIRECTORY_SEPARATOR . $backupFilename;
 
-        $written = file_put_contents($backupPath, $contents, LOCK_EX);
+        $written = @file_put_contents($backupPath, $contents, LOCK_EX);
         if ($written === false) {
             throw new RuntimeException('Unable to create backup file.');
         }
@@ -216,7 +216,7 @@ final class TemplateFileRepository
     {
         $basePath = $this->backupRootPath . DIRECTORY_SEPARATOR . basename($this->basePath());
 
-        if (! is_dir($basePath) && ! mkdir($basePath, 0777, true) && ! is_dir($basePath)) {
+        if (! is_dir($basePath) && ! @mkdir($basePath, 0777, true) && ! is_dir($basePath)) {
             throw new RuntimeException('Unable to initialize backup storage.');
         }
 

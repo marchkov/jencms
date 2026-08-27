@@ -55,7 +55,7 @@ try {
     }
 
     $template = new Template(
-        BASE_PATH . '/themes/' . $config['site']['theme'] . '/main.tpl',
+        BASE_PATH . '/public/themes/' . $config['site']['theme'] . '/main.tpl',
         $config
     );
 
@@ -114,11 +114,11 @@ function dispatch_admin_request(array $config, PDO $pdo, SettingsRepository $set
     $userRepository = new UserRepository($pdo);
     $authController = new AdminAuthController($userRepository, $config);
     $dashboardController = new AdminDashboardController($config);
+    $mediaRepository = new MediaRepository(BASE_PATH . '/public/uploads');
     $pageRepository = new AdminPageRepository($pdo);
-    $pageController = new AdminPageController($pageRepository, $config);
+    $pageController = new AdminPageController($pageRepository, $mediaRepository, $config);
     $sectionRepository = new AdminSectionRepository($pdo);
     $categoryRepository = new AdminCategoryRepository($pdo);
-    $mediaRepository = new MediaRepository(BASE_PATH . '/public/uploads');
     $mediaController = new AdminMediaController($mediaRepository, $config);
     $sectionController = new AdminSectionController($sectionRepository, $config);
     $categoryController = new AdminCategoryController($categoryRepository, $sectionRepository, $config);
@@ -133,7 +133,7 @@ function dispatch_admin_request(array $config, PDO $pdo, SettingsRepository $set
     $settingsController = new AdminSettingsController($settingsRepository, $pageRepository, $config);
     $templateController = new AdminTemplateController(
         new TemplateFileRepository(
-            BASE_PATH . '/themes/' . $config['site']['theme'],
+            BASE_PATH . '/public/themes/' . $config['site']['theme'],
             BASE_PATH . '/storage/template-backups'
         ),
         $config

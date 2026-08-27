@@ -19,10 +19,12 @@ It is intended to be a clean base for future site builds: simple to launch local
 
 ## Quick Start
 
-Clone the repository and run the built-in PHP server from the project root:
+Clone the repository and run the built-in PHP server from the project root. The
+supported document root is `public/`; `public/router.php` forwards application
+requests while PHP serves existing static files directly:
 
 ```powershell
-php -S localhost:8000 index.php
+php -S localhost:8000 -t public public/router.php
 ```
 
 Open in browser:
@@ -41,9 +43,9 @@ Change the password after the first login.
 
 ## Project Structure
 
-- `public/` - public entrypoint and uploaded files
+- `public/` - the only web root; entrypoint, themes, and uploaded files
 - `src/` - application core
-- `themes/` - frontend themes
+- `public/themes/` - frontend themes and their public assets
 - `views/` - admin panel views
 - `storage/` - migrations, database, starter content, and template backups
 - `settings.php` - main configuration
@@ -52,7 +54,7 @@ Change the password after the first login.
 
 JenCMS currently provides:
 
-- one frontend theme: `themes/default`
+- one frontend theme: `public/themes/default`
 - one-language content management
 - SQLite storage
 - admin panel for pages, sections, categories, posts, media, users, settings, and theme files
@@ -63,6 +65,39 @@ JenCMS currently provides:
 - uploaded files in `public/uploads/` are ignored by git
 - template backups in `storage/template-backups/` are ignored by git
 - required empty folders are kept with `.gitkeep`
+
+## Production web root
+
+Configure the web server document root to the absolute path of `public/`. Route
+requests for files and directories normally and send all other requests to
+`public/index.php`. Never expose the repository root as the document root because
+it contains application source, configuration, and storage files.
+
+For Apache, the included `public/.htaccess` provides the rewrite rule when
+`mod_rewrite` and per-directory overrides are enabled.
+
+## Routing smoke test
+
+With PHP available on `PATH`, run:
+
+```powershell
+.\tests\routing-smoke.ps1
+php .\tests\content-storage-smoke.php
+```
+
+## Rebuilding the admin editor
+
+The admin panel uses Tiptap 3.30.2 from the committed local bundle, so editing
+content does not depend on a CDN. To rebuild that bundle after changing its
+dependencies:
+
+```powershell
+npm install
+npm run build:editor
+```
+
+Commit `package-lock.json` together with dependency upgrades and keep all Tiptap
+packages pinned to the same version.
 
 ## Roadmap
 

@@ -47,7 +47,8 @@ final class PostController
             'submitLabel' => 'Create post',
             'sections' => $this->sections->options(),
             'categories' => $this->categories->options(),
-            'mediaLibraryUrl' => admin_path($this->config, 'media'),
+            'mediaUploadUrl' => admin_path($this->config, 'media/upload'),
+            'mediaImages' => $this->mediaImages(),
         ]);
     }
 
@@ -66,7 +67,8 @@ final class PostController
                 'submitLabel' => 'Create post',
                 'sections' => $this->sections->options(),
                 'categories' => $this->categories->options(),
-                'mediaLibraryUrl' => admin_path($this->config, 'media'),
+                'mediaUploadUrl' => admin_path($this->config, 'media/upload'),
+                'mediaImages' => $this->mediaImages(),
             ]);
             return;
         }
@@ -112,7 +114,8 @@ final class PostController
             'submitLabel' => 'Save changes',
             'sections' => $this->sections->options(),
             'categories' => $this->categories->options(),
-            'mediaLibraryUrl' => admin_path($this->config, 'media'),
+            'mediaUploadUrl' => admin_path($this->config, 'media/upload'),
+            'mediaImages' => $this->mediaImages(),
         ]);
     }
 
@@ -137,7 +140,8 @@ final class PostController
                 'submitLabel' => 'Save changes',
                 'sections' => $this->sections->options(),
                 'categories' => $this->categories->options(),
-                'mediaLibraryUrl' => admin_path($this->config, 'media'),
+                'mediaUploadUrl' => admin_path($this->config, 'media/upload'),
+                'mediaImages' => $this->mediaImages(),
             ]);
             return;
         }
@@ -285,6 +289,14 @@ final class PostController
         }
 
         return $this->media->upload($upload);
+    }
+
+    private function mediaImages(): array
+    {
+        return array_values(array_filter(
+            $this->media->all(),
+            static fn (array $file): bool => (bool) ($file['is_image'] ?? false)
+        ));
     }
 
     private function normalizePublishedAt(string $value): ?string

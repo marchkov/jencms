@@ -10,6 +10,7 @@ Thumbs.db
 *.log
 
 .vscode/
+node_modules/
 public/uploads/*
 !public/uploads/.gitkeep
 storage/template-backups/*

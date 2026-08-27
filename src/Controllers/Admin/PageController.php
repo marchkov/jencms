@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Controllers\Admin;
 
 use App\Repositories\AdminPageRepository;
+use App\Repositories\MediaRepository;
 
 final class PageController
 {
     public function __construct(
         private readonly AdminPageRepository $pages,
+        private readonly MediaRepository $media,
         private readonly array $config
     ) {
     }
@@ -37,7 +39,8 @@ final class PageController
             'page' => $this->emptyPage(),
             'errors' => [],
             'submitLabel' => 'Create page',
-            'mediaLibraryUrl' => admin_path($this->config, 'media'),
+            'mediaUploadUrl' => admin_path($this->config, 'media/upload'),
+            'mediaImages' => $this->mediaImages(),
         ]);
     }
 
@@ -54,7 +57,8 @@ final class PageController
                 'page' => $page,
                 'errors' => $errors,
                 'submitLabel' => 'Create page',
-                'mediaLibraryUrl' => admin_path($this->config, 'media'),
+                'mediaUploadUrl' => admin_path($this->config, 'media/upload'),
+                'mediaImages' => $this->mediaImages(),
             ]);
             return;
         }
@@ -91,7 +95,8 @@ final class PageController
             'page' => $page,
             'errors' => [],
             'submitLabel' => 'Save changes',
-            'mediaLibraryUrl' => admin_path($this->config, 'media'),
+            'mediaUploadUrl' => admin_path($this->config, 'media/upload'),
+            'mediaImages' => $this->mediaImages(),
         ]);
     }
 
@@ -114,7 +119,8 @@ final class PageController
                 'page' => $page,
                 'errors' => $errors,
                 'submitLabel' => 'Save changes',
-                'mediaLibraryUrl' => admin_path($this->config, 'media'),
+                'mediaUploadUrl' => admin_path($this->config, 'media/upload'),
+                'mediaImages' => $this->mediaImages(),
             ]);
             return;
         }
@@ -196,6 +202,14 @@ final class PageController
             'is_published' => 1,
             'sort_order' => 0,
         ];
+    }
+
+    private function mediaImages(): array
+    {
+        return array_values(array_filter(
+            $this->media->all(),
+            static fn (array $file): bool => (bool) ($file['is_image'] ?? false)
+        ));
     }
 
     private function listFilters(): array

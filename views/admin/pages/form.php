@@ -13,7 +13,7 @@
 <form method="post" action="<?= e($formAction) ?>">
   <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
 
-  <div class="grid grid--two">
+  <div class="form-stack">
     <section class="card">
       <h2>General settings</h2>
 
@@ -48,14 +48,17 @@
       </label>
     </section>
 
-    <section class="card">
-      <h2>Content</h2>
-      <div class="field">
-        <label for="content">Content</label>
-        <textarea class="js-rich-editor" id="content" name="content" rows="18" placeholder="Write the page body here."><?= e($page['content']) ?></textarea>
-      </div>
-      <p><a href="<?= e($mediaLibraryUrl) ?>">Open media library</a> to upload images or files, then insert their public path into the editor content.</p>
-    </section>
+    <div>
+      <textarea class="js-rich-editor" id="content" name="content" rows="24" aria-label="Page content" placeholder="Write the page content here."><?= e($page['content']) ?></textarea>
+      <script type="application/json" class="js-editor-media-data"><?= json_encode([
+        'uploadUrl' => $mediaUploadUrl,
+        'images' => array_map(static fn (array $file): array => [
+          'name' => $file['name'],
+          'path' => $file['path'],
+          'url' => site_page_url($config, ltrim($file['path'], '/')),
+        ], $mediaImages),
+      ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
+    </div>
   </div>
 
   <div class="actions" style="margin-top: 16px;">

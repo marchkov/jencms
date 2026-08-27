@@ -10,7 +10,7 @@
   </ul>
 <?php endif; ?>
 
-<div class="grid grid--two" style="margin-bottom: 16px;">
+<div class="form-stack" style="margin-bottom: 16px;">
   <section class="card">
     <h2><?= e($file['name']) ?></h2>
     <p class="muted"><code><?= e($file['path']) ?></code></p>

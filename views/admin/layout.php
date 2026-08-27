@@ -1,9 +1,10 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= e($adminTitle) ?> :: <?= e($config['site']['name']) ?></title>
+  <link rel="stylesheet" href="<?= e(site_page_url($config, 'admin-assets/editor.css', ['v' => (string) filemtime(BASE_PATH . '/public/admin-assets/editor.css')])) ?>">
   <style>
     body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #f5f5f5; color: #222; }
     a { color: #0b57d0; text-decoration: none; }
@@ -22,6 +23,8 @@
     .flash--error { background: #fdf0f0; border-color: #e3b0b0; }
     .grid { display: grid; gap: 16px; }
     .grid--two { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .form-stack { display: grid; gap: 20px; }
+    .form-stack > * { min-width: 0; }
     .card { border: 1px solid #d8d8d8; padding: 16px; background: #fafafa; }
     .card h2, .card h3 { margin-top: 0; }
     .table-wrap { overflow-x: auto; }
@@ -45,17 +48,12 @@
     .muted { color: #666; }
     .auth-shell { max-width: 460px; margin: 48px auto; background: #fff; border: 1px solid #d8d8d8; padding: 20px; }
     .auth-shell h1 { margin-top: 0; }
-    .editor-shell { border: 1px solid #bdbdbd; background: #fff; }
-    .editor-toolbar { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border-bottom: 1px solid #d8d8d8; background: #f4f4f4; }
-    .editor-toolbar button { padding: 6px 10px; border: 1px solid #c0c0c0; background: #fff; color: #222; }
-    .editor-surface { min-height: 320px; padding: 12px; outline: none; }
-    .editor-surface:focus { box-shadow: inset 0 0 0 2px #d9e6ff; }
-    .rich-editor-source { display: none; }
     @media (max-width: 720px) {
       .admin-shell { padding: 10px; }
       .admin-content, .admin-header { padding: 12px; }
       th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) { display: none; }
-      .editor-surface { min-height: 240px; }
+      .form-stack { gap: 14px; }
+      .actions > .button, .actions > button, .actions > input[type="submit"] { flex: 1 1 auto; text-align: center; }
     }
   </style>
 </head>
@@ -106,92 +104,8 @@
 <?php endif; ?>
 <script>
 (function () {
-  function enhanceEditor(textarea) {
-    if (!textarea || typeof document.execCommand !== 'function') {
-      return;
-    }
-
-    var shell = document.createElement('div');
-    shell.className = 'editor-shell';
-
-    var toolbar = document.createElement('div');
-    toolbar.className = 'editor-toolbar';
-
-    var surface = document.createElement('div');
-    surface.className = 'editor-surface';
-    surface.contentEditable = 'true';
-    surface.innerHTML = textarea.value || '';
-
-    var buttons = [
-      { label: 'B', command: 'bold' },
-      { label: 'I', command: 'italic' },
-      { label: 'H2', command: 'formatBlock', value: '<h2>' },
-      { label: 'H3', command: 'formatBlock', value: '<h3>' },
-      { label: 'P', command: 'formatBlock', value: '<p>' },
-      { label: 'UL', command: 'insertUnorderedList' },
-      { label: 'OL', command: 'insertOrderedList' },
-      { label: 'Link', command: 'createLink', prompt: 'Enter URL' },
-      { label: 'Unlink', command: 'unlink' }
-    ];
-
-    function syncToTextarea() {
-      textarea.value = surface.innerHTML;
-    }
-
-    buttons.forEach(function (item) {
-      var button = document.createElement('button');
-      button.type = 'button';
-      button.textContent = item.label;
-      button.addEventListener('click', function () {
-        surface.focus();
-        if (item.prompt) {
-          var value = window.prompt(item.prompt, 'https://');
-          if (!value) {
-            return;
-          }
-          document.execCommand(item.command, false, value);
-        } else if (item.value) {
-          document.execCommand(item.command, false, item.value);
-        } else {
-          document.execCommand(item.command, false, null);
-        }
-        syncToTextarea();
-      });
-      toolbar.appendChild(button);
-    });
-
-    surface.addEventListener('input', syncToTextarea);
-
-    textarea.className += ' rich-editor-source';
-    textarea.parentNode.insertBefore(shell, textarea);
-    shell.appendChild(toolbar);
-    shell.appendChild(surface);
-  }
-
   function initEditors() {
-    var editors = document.querySelectorAll('textarea.js-rich-editor');
-    for (var i = 0; i < editors.length; i += 1) {
-      enhanceEditor(editors[i]);
-    }
-
-    var forms = document.querySelectorAll('form');
-    for (var j = 0; j < forms.length; j += 1) {
-      forms[j].addEventListener('submit', function () {
-        var textareas = this.querySelectorAll('textarea.js-rich-editor');
-        for (var k = 0; k < textareas.length; k += 1) {
-          var previous = textareas[k].previousSibling;
-          while (previous && previous.nodeType !== 1) {
-            previous = previous.previousSibling;
-          }
-          if (previous && previous.className === 'editor-shell') {
-            var surface = previous.querySelector('.editor-surface');
-            if (surface) {
-              textareas[k].value = surface.innerHTML;
-            }
-          }
-        }
-      });
-    }
+    // Tiptap editors are initialized by the ES module below.
   }
 
   function initCategoryFilters() {
@@ -323,6 +237,8 @@
   }
 }());
 </script>
+<script src="<?= e(site_page_url($config, 'admin-assets/tiptap-v3.30.2.min.js', ['v' => (string) filemtime(BASE_PATH . '/public/admin-assets/tiptap-v3.30.2.min.js')])) ?>"></script>
+<script src="<?= e(site_page_url($config, 'admin-assets/editor.js', ['v' => (string) filemtime(BASE_PATH . '/public/admin-assets/editor.js')])) ?>"></script>
 </body>
 </html>
 
